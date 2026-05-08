@@ -58,6 +58,9 @@ export const ModelName = {
   Session: 'Session',
   Account: 'Account',
   Verification: 'Verification',
+  Item: 'Item',
+  Event: 'Event',
+  Reservation: 'Reservation',
 } as const;
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName];
@@ -133,6 +136,42 @@ export const VerificationScalarFieldEnum = {
 
 export type VerificationScalarFieldEnum =
   (typeof VerificationScalarFieldEnum)[keyof typeof VerificationScalarFieldEnum];
+
+export const ItemScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  category: 'category',
+  totalQuantity: 'totalQuantity',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type ItemScalarFieldEnum =
+  (typeof ItemScalarFieldEnum)[keyof typeof ItemScalarFieldEnum];
+
+export const EventScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  startDate: 'startDate',
+  endDate: 'endDate',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+} as const;
+
+export type EventScalarFieldEnum =
+  (typeof EventScalarFieldEnum)[keyof typeof EventScalarFieldEnum];
+
+export const ReservationScalarFieldEnum = {
+  id: 'id',
+  quantity: 'quantity',
+  itemId: 'itemId',
+  eventId: 'eventId',
+} as const;
+
+export type ReservationScalarFieldEnum =
+  (typeof ReservationScalarFieldEnum)[keyof typeof ReservationScalarFieldEnum];
 
 export const SortOrder = {
   asc: 'asc',

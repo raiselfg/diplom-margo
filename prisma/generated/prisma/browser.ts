@@ -36,3 +36,18 @@ export type Account = Prisma.AccountModel;
  *
  */
 export type Verification = Prisma.VerificationModel;
+/**
+ * Model Item
+ *
+ */
+export type Item = Prisma.ItemModel;
+/**
+ * Model Event
+ *
+ */
+export type Event = Prisma.EventModel;
+/**
+ * Model Reservation
+ *
+ */
+export type Reservation = Prisma.ReservationModel;

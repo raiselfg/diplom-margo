@@ -71,3 +71,42 @@ model Verification {
 
   @@map("verification")
 }
+
+enum EventStatus {
+  CONFIRMED
+  FINISHED
+}
+
+model Item {
+  id            String        @id @default(uuid())
+  name          String
+  category      String?
+  totalQuantity Int           @default(0)
+  description   String?
+  reservations  Reservation[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Event {
+  id           String        @id @default(uuid())
+  title        String
+  startDate    DateTime
+  endDate      DateTime
+  status       EventStatus   @default(CONFIRMED)
+  reservations Reservation[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Reservation {
+  id       String @id @default(uuid())
+  quantity Int
+  itemId   String
+  eventId  String
+  item     Item   @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  event    Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([itemId])
+  @@index([eventId])
+}

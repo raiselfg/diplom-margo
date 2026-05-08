@@ -8,5 +8,9 @@
  * 🟢 You can import this file directly.
  */
 
-// This file is empty because there are no enums in the schema.
-export {};
+export const EventStatus = {
+  CONFIRMED: 'CONFIRMED',
+  FINISHED: 'FINISHED',
+} as const;
+
+export type EventStatus = (typeof EventStatus)[keyof typeof EventStatus];
