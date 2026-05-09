@@ -1,4 +1,4 @@
-import * as z from 'zod';
+import z from 'zod';
 
 export const categorySchema = z.object({
   name: z.string().min(1, 'Название обязательно'),
@@ -6,7 +6,7 @@ export const categorySchema = z.object({
 
 export const itemSchema = z.object({
   name: z.string().min(1, 'Название обязательно'),
-  categoryId: z.string().uuid('Некорректный ID категории').nullish(),
+  categoryId: z.uuid('Выберите категорию'),
   totalQuantity: z
     .number()
     .int()

@@ -78,7 +78,7 @@ export default function InventoryPage() {
   const filteredItems = items?.filter(
     (item) =>
       item.name.toLowerCase().includes(search.toLowerCase()) ||
-      item.category?.name.toLowerCase().includes(search.toLowerCase()),
+      (item.category?.name ?? '').toLowerCase().includes(search.toLowerCase()),
   );
 
   return (

@@ -11,12 +11,12 @@ import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from '@/ui/components/ui/sidebar';
+import { ThemeToggle } from './theme-toggle';
 
 const navItems = [
   {
@@ -46,12 +46,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar {...props}>
-      <SidebarHeader className="flex h-16 items-center border-b px-6">
-        <span className="text-lg font-bold tracking-tight">Admin Panel</span>
-      </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Управление</SidebarGroupLabel>
+          <div className="mb-3 flex items-center justify-between">
+            <SidebarGroupLabel>Учет инвентаря</SidebarGroupLabel>
+            <ThemeToggle />
+          </div>
+
           <SidebarGroupContent>
             <SidebarMenu className="flex flex-col gap-1">
               {navItems.map((item) => {

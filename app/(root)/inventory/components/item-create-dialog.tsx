@@ -42,7 +42,7 @@ export function ItemCreateDialog({
     resolver: zodResolver(itemSchema),
     defaultValues: {
       name: '',
-      categoryId: null,
+      // categoryId: undefined,
       totalQuantity: 0,
       description: '',
     },

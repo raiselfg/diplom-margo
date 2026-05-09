@@ -95,7 +95,9 @@ export function InventoryTable({
               {item.category ? (
                 <Badge variant="secondary">{item.category.name}</Badge>
               ) : (
-                '-'
+                <span className="text-muted-foreground text-xs italic">
+                  Без категории
+                </span>
               )}
             </TableCell>
             <TableCell>{item.totalQuantity}</TableCell>

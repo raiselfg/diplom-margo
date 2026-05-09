@@ -6,8 +6,8 @@ export interface Category {
 export interface InventoryItem {
   id: string;
   name: string;
-  categoryId: string | null;
-  category: Category | null;
+  categoryId: string;
+  category: Category;
   totalQuantity: number;
   description: string | null;
   createdAt: string;

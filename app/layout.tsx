@@ -2,9 +2,7 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
 import React from 'react';
-import { Toaster } from '@/ui/components/ui/sonner';
 import { Providers } from '@/ui/components/providers';
-import { TooltipProvider } from '@/ui/components/ui/tooltip';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -18,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: 'Учет инвентаря',
-  description: 'Система управления праздничным инвентарем',
+  description: 'Система управления инвентарем',
 };
 
 export default function RootLayout({
@@ -29,15 +27,11 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body>
-        <Providers>
-          <TooltipProvider>
-            {children}
-            <Toaster position="top-center" duration={3000} />
-          </TooltipProvider>
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

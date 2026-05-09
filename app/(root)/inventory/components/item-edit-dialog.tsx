@@ -45,7 +45,7 @@ export function ItemEditDialog({
     resolver: zodResolver(itemSchema),
     defaultValues: {
       name: item.name,
-      categoryId: item.categoryId ?? null,
+      categoryId: item.categoryId,
       totalQuantity: item.totalQuantity,
       description: item.description || '',
     },
@@ -54,7 +54,7 @@ export function ItemEditDialog({
   useEffect(() => {
     form.reset({
       name: item.name,
-      categoryId: item.categoryId ?? null,
+      categoryId: item.categoryId,
       totalQuantity: item.totalQuantity,
       description: item.description || '',
     });
