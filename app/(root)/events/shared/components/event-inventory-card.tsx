@@ -17,6 +17,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/ui/components/ui/table';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '@/ui/components/ui/empty';
 import { EventInput } from '@/lib/validations';
 import { InventoryItem } from '../types';
 import { ReservationRow } from './reservation-row';
@@ -56,18 +62,20 @@ export function EventInventoryCard({
           size="sm"
           onClick={() => append({ itemId: '', quantity: 1 })}
         >
-          <Plus className="mr-2 size-4" />
+          <Plus data-icon="inline-start" />
           Добавить позицию
         </Button>
       </CardHeader>
       <CardContent>
         {fields.length === 0 ? (
-          <div
-            key="empty-inventory"
-            className="text-muted-foreground rounded-lg border-2 border-dashed py-10 text-center"
-          >
-            Список инвентаря пуст. Нажмите кнопку выше, чтобы добавить предметы.
-          </div>
+          <Empty className="border-0 border-t py-10">
+            <EmptyHeader>
+              <EmptyTitle>Список инвентаря пуст</EmptyTitle>
+              <EmptyDescription>
+                Нажмите кнопку выше, чтобы добавить предметы к мероприятию.
+              </EmptyDescription>
+            </EmptyHeader>
+          </Empty>
         ) : (
           <Table>
             <TableHeader>

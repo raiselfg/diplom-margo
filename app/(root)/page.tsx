@@ -18,11 +18,17 @@ import {
   TableRow,
 } from '@/ui/components/ui/table';
 import { Badge } from '@/ui/components/ui/badge';
+import { Button } from '@/ui/components/ui/button';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '@/ui/components/ui/empty';
 import Link from 'next/link';
 
 interface DashboardItem {
   id: string;
-  name: string;
 }
 
 interface DashboardEvent {
@@ -31,6 +37,12 @@ interface DashboardEvent {
   startDate: string;
   endDate: string;
   status: 'CONFIRMED' | 'FINISHED';
+}
+
+function FormattedDate({ date }: { date: string }) {
+  return (
+    <span suppressHydrationWarning>{new Date(date).toLocaleDateString()}</span>
+  );
 }
 
 async function fetchStats() {
@@ -54,7 +66,9 @@ export default function AdminPage() {
   });
 
   if (error)
-    return <div className="text-destructive">Ошибка загрузки данных</div>;
+    return (
+      <div className="text-destructive text-sm">Ошибка загрузки данных</div>
+    );
 
   const stats = [
     {
@@ -81,7 +95,7 @@ export default function AdminPage() {
     <div className="flex flex-col gap-8">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Дашборд</h1>
-        <p className="text-muted-foreground">
+        <p className="text-muted-foreground text-sm">
           Обзор состояния системы и ближайших событий.
         </p>
       </div>
@@ -89,11 +103,11 @@ export default function AdminPage() {
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map((stat) => (
           <Card key={stat.title}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between pb-2">
               <CardTitle className="text-sm font-medium">
                 {stat.title}
               </CardTitle>
-              <stat.icon className="text-muted-foreground size-4" />
+              <stat.icon className="text-muted-foreground" data-icon />
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -115,11 +129,21 @@ export default function AdminPage() {
         </CardHeader>
         <CardContent>
           {isLoading ? (
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
               <Skeleton className="h-10 w-full" />
             </div>
+          ) : !data?.events || data.events.length === 0 ? (
+            <Empty className="border-0">
+              <EmptyHeader>
+                <CalendarDays className="text-muted-foreground size-8" />
+                <EmptyTitle>Мероприятий не найдено</EmptyTitle>
+                <EmptyDescription>
+                  В ближайшее время мероприятий не запланировано.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
           ) : (
             <Table>
               <TableHeader>
@@ -135,8 +159,8 @@ export default function AdminPage() {
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.title}</TableCell>
                     <TableCell>
-                      {new Date(event.startDate).toLocaleDateString()} —{' '}
-                      {new Date(event.endDate).toLocaleDateString()}
+                      <FormattedDate date={event.startDate} /> —{' '}
+                      <FormattedDate date={event.endDate} />
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -150,25 +174,17 @@ export default function AdminPage() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Link
-                        href={`/events/${event.id}`}
-                        className="text-primary text-sm font-medium hover:underline"
+                      <Button
+                        variant="link"
+                        size="sm"
+                        render={<Link href={`/events/${event.id}`} />}
+                        nativeButton={false}
                       >
                         Редактировать
-                      </Link>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
-                {(!data?.events || data.events.length === 0) && (
-                  <TableRow>
-                    <TableCell
-                      colSpan={4}
-                      className="text-muted-foreground h-24 text-center"
-                    >
-                      Мероприятий не найдено
-                    </TableCell>
-                  </TableRow>
-                )}
               </TableBody>
             </Table>
           )}

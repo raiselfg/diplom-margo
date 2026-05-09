@@ -51,7 +51,7 @@ export const AuthForm = () => {
           name="email"
           control={control}
           render={({ field, fieldState }) => (
-            <Field>
+            <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={field.name}>Почта</FieldLabel>
               <Input
                 {...field}
@@ -68,7 +68,7 @@ export const AuthForm = () => {
           name="password"
           control={control}
           render={({ field, fieldState }) => (
-            <Field>
+            <Field data-invalid={fieldState.invalid}>
               <FieldLabel htmlFor={field.name}>Пароль</FieldLabel>
               <Input
                 {...field}
@@ -83,14 +83,8 @@ export const AuthForm = () => {
         />
 
         <Button className="w-full" type="submit" disabled={isSubmitting}>
-          {isSubmitting ? (
-            <div className="flex items-center gap-2">
-              <Spinner />
-              <span>Вход...</span>
-            </div>
-          ) : (
-            'Войти'
-          )}
+          {isSubmitting && <Spinner data-icon="inline-start" />}
+          {isSubmitting ? 'Вход...' : 'Войти'}
         </Button>
       </FieldGroup>
     </form>

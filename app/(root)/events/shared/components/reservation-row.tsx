@@ -1,6 +1,6 @@
 'use client';
 
-import { Trash2, Loader2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { Control, Controller, useWatch } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/ui/components/ui/button';
@@ -15,6 +15,7 @@ import {
 import { TableCell, TableRow } from '@/ui/components/ui/table';
 import { Badge } from '@/ui/components/ui/badge';
 import { Field, FieldError } from '@/ui/components/ui/field';
+import { Spinner } from '@/ui/components/ui/spinner';
 import { cn } from '@/ui/lib/utils';
 import { EventInput } from '@/lib/validations';
 import { InventoryItem } from '../types';
@@ -131,7 +132,7 @@ export function ReservationRow({
       </TableCell>
       <TableCell className="text-right">
         {isChecking ? (
-          <Loader2 className="ml-auto size-4 animate-spin" />
+          <Spinner className="ml-auto" />
         ) : avail !== undefined ? (
           <Badge variant={isOverLimit ? 'destructive' : 'secondary'}>
             Свободно: {avail}
@@ -142,7 +143,7 @@ export function ReservationRow({
       </TableCell>
       <TableCell>
         <Button variant="ghost" size="icon" onClick={onRemove}>
-          <Trash2 className="text-muted-foreground size-4" />
+          <Trash2 className="text-muted-foreground" data-icon />
         </Button>
       </TableCell>
     </TableRow>

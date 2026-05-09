@@ -3,12 +3,13 @@
 import { useEffect, useMemo } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft, Loader2 } from 'lucide-react';
+import { ChevronLeft } from 'lucide-react';
 import { useForm, useWatch } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 
 import { Button } from '@/ui/components/ui/button';
+import { Spinner } from '@/ui/components/ui/spinner';
 import { eventSchema, type EventInput } from '@/lib/validations';
 
 import { EventBasicInfoCard } from '../shared/components/event-basic-info-card';
@@ -107,7 +108,7 @@ export default function EditEventPage() {
   if (isLoadingEvent) {
     return (
       <div className="flex h-32 items-center justify-center">
-        <Loader2 className="animate-spin" />
+        <Spinner />
       </div>
     );
   }
@@ -116,7 +117,7 @@ export default function EditEventPage() {
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ChevronLeft className="size-4" />
+          <ChevronLeft />
         </Button>
         <h1 className="text-3xl font-bold tracking-tight">
           Редактирование мероприятия
@@ -125,7 +126,7 @@ export default function EditEventPage() {
 
       <form
         onSubmit={form.handleSubmit((v) => mutation.mutate(v))}
-        className="space-y-8"
+        className="flex flex-col gap-8"
       >
         <div className="grid gap-6 md:grid-cols-3">
           <EventBasicInfoCard control={form.control} />
@@ -145,10 +146,8 @@ export default function EditEventPage() {
             Отмена
           </Button>
           <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending && (
-              <Loader2 className="mr-2 size-4 animate-spin" />
-            )}
-            Сохранить изменения
+            {mutation.isPending && <Spinner data-icon="inline-start" />}
+            {mutation.isPending ? 'Сохранение...' : 'Сохранить изменения'}
           </Button>
         </div>
       </form>

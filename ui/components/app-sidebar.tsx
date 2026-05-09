@@ -62,15 +62,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
                 return (
                   <SidebarMenuItem key={item.title}>
-                    <Link href={item.url} className="flex items-center gap-2">
-                      <SidebarMenuButton
-                        isActive={isActive}
-                        className="cursor-pointer"
-                      >
-                        <item.icon className="size-4" />
-                        <span>{item.title}</span>
-                      </SidebarMenuButton>
-                    </Link>
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      render={<Link href={item.url} />}
+                    >
+                      <item.icon data-icon />
+                      <span>{item.title}</span>
+                    </SidebarMenuButton>
                   </SidebarMenuItem>
                 );
               })}

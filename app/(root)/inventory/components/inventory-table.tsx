@@ -27,6 +27,12 @@ interface InventoryTableProps {
   onDelete: (id: string) => void;
 }
 
+function FormattedDate({ date }: { date: string }) {
+  return (
+    <span suppressHydrationWarning>{new Date(date).toLocaleDateString()}</span>
+  );
+}
+
 export function InventoryTable({
   items,
   isLoading,
@@ -94,25 +100,25 @@ export function InventoryTable({
             </TableCell>
             <TableCell>{item.totalQuantity}</TableCell>
             <TableCell>
-              {new Date(item.createdAt).toLocaleDateString()}
+              <FormattedDate date={item.createdAt} />
             </TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger
-                  render={<Button variant="ghost" className="size-8 p-0" />}
+                  render={<Button variant="ghost" size="icon-sm" />}
                 >
-                  <MoreHorizontal className="size-4" />
+                  <MoreHorizontal />
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => onEdit(item)}>
-                    <Pencil className="mr-2 size-4" />
+                    <Pencil data-icon="inline-start" />
                     Изменить
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     className="text-destructive"
                     onClick={() => onDelete(item.id)}
                   >
-                    <Trash2 className="mr-2 size-4" />
+                    <Trash2 data-icon="inline-start" />
                     Удалить
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -120,16 +126,6 @@ export function InventoryTable({
             </TableCell>
           </TableRow>
         ))}
-        {items?.length === 0 && (
-          <TableRow key="no-items">
-            <TableCell
-              colSpan={5}
-              className="text-muted-foreground h-24 text-center"
-            >
-              Предметы не найдены
-            </TableCell>
-          </TableRow>
-        )}
       </TableBody>
     </Table>
   );

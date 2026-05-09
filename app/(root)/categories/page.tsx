@@ -7,7 +7,11 @@ import { toast } from 'sonner';
 
 import { Card, CardContent } from '@/ui/components/ui/card';
 import { Button } from '@/ui/components/ui/button';
-import { Input } from '@/ui/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/ui/components/ui/input-group';
 import {
   Table,
   TableBody,
@@ -23,6 +27,12 @@ import {
   DropdownMenuTrigger,
 } from '@/ui/components/ui/dropdown-menu';
 import { Skeleton } from '@/ui/components/ui/skeleton';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '@/ui/components/ui/empty';
 
 import { CategoryCreateDialog } from './components/category-create-dialog';
 import { CategoryEditDialog } from './components/category-edit-dialog';
@@ -83,95 +93,95 @@ export default function CategoriesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Категории</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Управление категориями для инвентаря.
           </p>
         </div>
         <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="mr-2 size-4" />
+          <Plus data-icon="inline-start" />
           Добавить категорию
         </Button>
       </div>
 
       <div className="flex max-w-sm items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-          <Input
-            placeholder="Поиск по названию..."
-            className="pl-9"
+        <InputGroup>
+          <InputGroupAddon>
+            <Search data-icon />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder="Поиск по названию"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        </div>
+        </InputGroup>
       </div>
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Название</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      <Skeleton className="h-5 w-40" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-5" />
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : filteredCategories?.length === 0 ? (
+          {!isLoading && filteredCategories?.length === 0 ? (
+            <Empty className="rounded-none border-0 border-t">
+              <EmptyHeader>
+                <Search className="text-muted-foreground size-8" />
+                <EmptyTitle>Категории не найдены</EmptyTitle>
+                <EmptyDescription>
+                  Попробуйте изменить запрос или добавить новую категорию.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <Table>
+              <TableHeader>
                 <TableRow>
-                  <TableCell
-                    colSpan={2}
-                    className="text-muted-foreground h-24 text-center"
-                  >
-                    Категории не найдены
-                  </TableCell>
+                  <TableHead>Название</TableHead>
+                  <TableHead className="w-12"></TableHead>
                 </TableRow>
-              ) : (
-                filteredCategories?.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell className="font-medium">
-                      {category.name}
-                    </TableCell>
-                    <TableCell>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          render={
-                            <Button variant="ghost" className="size-8 p-0" />
-                          }
-                        >
-                          <MoreHorizontal className="size-4" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={() => handleEdit(category)}
-                          >
-                            <Pencil className="mr-2 size-4" />
-                            Изменить
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={() => setDeletingId(category.id)}
-                          >
-                            <Trash2 className="mr-2 size-4" />
-                            Удалить
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {isLoading
+                  ? Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton className="h-5 w-40" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-5" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  : filteredCategories?.map((category) => (
+                      <TableRow key={category.id}>
+                        <TableCell className="font-medium">
+                          {category.name}
+                        </TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              render={<Button variant="ghost" size="icon-sm" />}
+                            >
+                              <MoreHorizontal />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                onClick={() => handleEdit(category)}
+                              >
+                                <Pencil data-icon="inline-start" />
+                                Изменить
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => setDeletingId(category.id)}
+                              >
+                                <Trash2 data-icon="inline-start" />
+                                Удалить
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 

@@ -8,7 +8,7 @@ import {
   MoreHorizontal,
   Pencil,
   Trash2,
-  CheckCircle2,
+  CalendarDays,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
@@ -17,7 +17,11 @@ import Link from 'next/link';
 
 import { Card, CardContent } from '@/ui/components/ui/card';
 import { Button } from '@/ui/components/ui/button';
-import { Input } from '@/ui/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/ui/components/ui/input-group';
 import {
   Table,
   TableBody,
@@ -35,6 +39,12 @@ import {
 import { Badge } from '@/ui/components/ui/badge';
 import { Skeleton } from '@/ui/components/ui/skeleton';
 import { DeleteConfirmDialog } from '@/ui/components/delete-confirm-dialog';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyTitle,
+} from '@/ui/components/ui/empty';
 
 interface EventListItem {
   id: string;
@@ -88,141 +98,133 @@ export default function EventsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Мероприятия</h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             Планирование событий и управление бронированием.
           </p>
         </div>
-        <Button>
-          <Link
-            href="/events/new"
-            className="flex cursor-default items-center gap-2"
-          >
-            <Plus className="size-4" />
-            Новое мероприятие
-          </Link>
+        <Button render={<Link href="/events/new" />} nativeButton={false}>
+          <Plus data-icon="inline-start" />
+          Новое мероприятие
         </Button>
       </div>
 
       <div className="flex max-w-sm items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-          <Input
+        <InputGroup>
+          <InputGroupAddon>
+            <Search data-icon />
+          </InputGroupAddon>
+          <InputGroupInput
             placeholder="Поиск по названию"
-            className="pl-9"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        </div>
+        </InputGroup>
       </div>
 
       <Card>
         <CardContent className="p-0">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Название</TableHead>
-                <TableHead>Даты</TableHead>
-                <TableHead>Статус</TableHead>
-                <TableHead>Позиций</TableHead>
-                <TableHead className="w-12"></TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {isLoading
-                ? Array.from({ length: 5 }).map((_, i) => (
-                    <TableRow key={i}>
-                      <TableCell>
-                        <Skeleton className="h-5 w-40" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-5 w-48" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-5 w-24" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-5 w-12" />
-                      </TableCell>
-                      <TableCell>
-                        <Skeleton className="h-5 w-5" />
-                      </TableCell>
-                    </TableRow>
-                  ))
-                : filteredEvents?.map((event) => (
-                    <TableRow key={event.id}>
-                      <TableCell className="font-medium">
-                        {event.title}
-                      </TableCell>
-                      <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
-                        {format(new Date(event.startDate), 'd MMM', {
-                          locale: ru,
-                        })}{' '}
-                        -{' '}
-                        {format(new Date(event.endDate), 'd MMM yyyy', {
-                          locale: ru,
-                        })}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant={
-                            event.status === 'CONFIRMED'
-                              ? 'default'
-                              : 'secondary'
-                          }
+          {!isLoading && filteredEvents?.length === 0 ? (
+            <Empty className="rounded-none border-0 border-t">
+              <EmptyHeader>
+                <CalendarDays className="text-muted-foreground size-8" />
+                <EmptyTitle>Мероприятия не найдены</EmptyTitle>
+                <EmptyDescription>
+                  Попробуйте изменить запрос или создать новое мероприятие.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Название</TableHead>
+                  <TableHead>Даты</TableHead>
+                  <TableHead>Статус</TableHead>
+                  <TableHead>Позиций</TableHead>
+                  <TableHead className="w-12"></TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {isLoading
+                  ? Array.from({ length: 5 }).map((_, i) => (
+                      <TableRow key={i}>
+                        <TableCell>
+                          <Skeleton className="h-5 w-40" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-48" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-24" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-12" />
+                        </TableCell>
+                        <TableCell>
+                          <Skeleton className="h-5 w-5" />
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  : filteredEvents?.map((event) => (
+                      <TableRow key={event.id}>
+                        <TableCell className="font-medium">
+                          {event.title}
+                        </TableCell>
+                        <TableCell
+                          className="text-muted-foreground text-xs whitespace-nowrap"
+                          suppressHydrationWarning
                         >
-                          {event.status === 'CONFIRMED' ? (
-                            <span className="flex items-center gap-1">
-                              <CheckCircle2 className="size-3" /> Забронировано
-                            </span>
-                          ) : (
-                            'Завершено'
-                          )}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{event._count?.reservations || 0}</TableCell>
-                      <TableCell>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            render={
-                              <Button variant="ghost" className="size-8 p-0" />
+                          {format(new Date(event.startDate), 'd MMM', {
+                            locale: ru,
+                          })}{' '}
+                          -{' '}
+                          {format(new Date(event.endDate), 'd MMM yyyy', {
+                            locale: ru,
+                          })}
+                        </TableCell>
+                        <TableCell>
+                          <Badge
+                            variant={
+                              event.status === 'CONFIRMED'
+                                ? 'default'
+                                : 'secondary'
                             }
                           >
-                            <MoreHorizontal className="size-4" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>
-                              <Link
-                                href={`/events/${event.id}`}
-                                className="flex cursor-default items-center gap-1"
-                              >
-                                <Pencil className="mr-2 size-4" />
-                                Изменить
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={() => setDeletingId(event.id)}
+                            {event.status === 'CONFIRMED'
+                              ? 'Забронировано'
+                              : 'Завершено'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>{event._count?.reservations || 0}</TableCell>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger
+                              render={<Button variant="ghost" size="icon-sm" />}
                             >
-                              <Trash2 className="mr-2 size-4" />
-                              Удалить
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-              {filteredEvents?.length === 0 && !isLoading && (
-                <TableRow>
-                  <TableCell
-                    colSpan={5}
-                    className="text-muted-foreground h-24 text-center"
-                  >
-                    Мероприятий не найдено
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                              <MoreHorizontal />
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem
+                                render={<Link href={`/events/${event.id}`} />}
+                              >
+                                <Pencil data-icon="inline-start" />
+                                Изменить
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="text-destructive"
+                                onClick={() => setDeletingId(event.id)}
+                              >
+                                <Trash2 data-icon="inline-start" />
+                                Удалить
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+              </TableBody>
+            </Table>
+          )}
         </CardContent>
       </Card>
 

@@ -9,7 +9,7 @@ import {
   DialogTitle,
 } from '@/ui/components/ui/dialog';
 import { Button } from '@/ui/components/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Spinner } from '@/ui/components/ui/spinner';
 
 interface DeleteConfirmDialogProps {
   isOpen: boolean;
@@ -35,7 +35,7 @@ export function DeleteConfirmDialog({
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
-        <DialogFooter className="gap-2 sm:gap-0">
+        <DialogFooter className="flex gap-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
@@ -48,8 +48,8 @@ export function DeleteConfirmDialog({
             onClick={onConfirm}
             disabled={isPending}
           >
-            {isPending && <Loader2 className="mr-2 size-4 animate-spin" />}
-            Удалить
+            {isPending && <Spinner data-icon="inline-start" />}
+            {isPending ? 'Удаление...' : 'Удалить'}
           </Button>
         </DialogFooter>
       </DialogContent>

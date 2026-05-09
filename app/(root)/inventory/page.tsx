@@ -7,7 +7,17 @@ import { toast } from 'sonner';
 
 import { Card, CardContent } from '@/ui/components/ui/card';
 import { Button } from '@/ui/components/ui/button';
-import { Input } from '@/ui/components/ui/input';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from '@/ui/components/ui/input-group';
+import {
+  Empty,
+  EmptyHeader,
+  EmptyTitle,
+  EmptyDescription,
+} from '@/ui/components/ui/empty';
 
 import { InventoryTable } from './components/inventory-table';
 import { ItemCreateDialog } from './components/item-create-dialog';
@@ -86,35 +96,48 @@ export default function InventoryPage() {
             setIsAddOpen(true);
           }}
         >
-          <Plus className="mr-2 size-4" />
+          <Plus data-icon="inline-start" />
           Добавить предмет
         </Button>
       </div>
 
       <div className="flex max-w-sm items-center gap-2">
-        <div className="relative flex-1">
-          <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-          <Input
-            placeholder="Поиск по названию или категории..."
-            className="pl-9"
+        <InputGroup>
+          <InputGroupAddon>
+            <Search data-icon />
+          </InputGroupAddon>
+          <InputGroupInput
+            placeholder="Поиск по названию или категории"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-        </div>
+        </InputGroup>
       </div>
 
       <Card>
         <CardContent className="p-0">
-          <InventoryTable
-            items={filteredItems}
-            isLoading={isLoading}
-            onEdit={(item) => {
-              setEditingItem(item);
-            }}
-            onDelete={(id) => {
-              setDeletingId(id);
-            }}
-          />
+          {!isLoading && filteredItems?.length === 0 ? (
+            <Empty className="rounded-none border-0 border-t">
+              <EmptyHeader>
+                <Search className="text-muted-foreground size-8" />
+                <EmptyTitle>Ничего не найдено</EmptyTitle>
+                <EmptyDescription>
+                  Попробуйте изменить запрос или добавить новый предмет.
+                </EmptyDescription>
+              </EmptyHeader>
+            </Empty>
+          ) : (
+            <InventoryTable
+              items={filteredItems}
+              isLoading={isLoading}
+              onEdit={(item) => {
+                setEditingItem(item);
+              }}
+              onDelete={(id) => {
+                setDeletingId(id);
+              }}
+            />
+          )}
         </CardContent>
       </Card>
 
