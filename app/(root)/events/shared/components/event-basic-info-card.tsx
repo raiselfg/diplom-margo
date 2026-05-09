@@ -154,7 +154,7 @@ export function EventBasicInfoCard({ control }: EventBasicInfoCardProps) {
                   </Popover>
                   <Input
                     type="time"
-                    className="w-[120px]"
+                    className="w-30"
                     value={field.value ? format(field.value, 'HH:mm') : ''}
                     onChange={(e) => {
                       const [hours, minutes] = e.target.value.split(':');
