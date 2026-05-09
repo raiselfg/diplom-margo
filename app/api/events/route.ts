@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import prisma from '@/prisma/prisma-client';
-import { eventSchema } from '@/lib/validations';
+import { eventApiSchema } from '@/lib/validations';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 
@@ -33,7 +33,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const validatedData = eventSchema.parse(body);
+    const validatedData = eventApiSchema.parse(body);
 
     // Interactive Transaction with Serializable isolation to prevent race conditions
     return await prisma.$transaction(

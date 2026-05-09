@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { z } from 'zod';
 import prisma from '@/prisma/prisma-client';
-import { eventSchema } from '@/lib/validations';
+import { eventObjectSchema } from '@/lib/validations';
 import { auth } from '@/lib/auth';
 
 export async function GET(
@@ -53,7 +53,13 @@ export async function PATCH(
 
     const { id } = await params;
     const body = await request.json();
-    const validatedData = eventSchema.partial().parse(body);
+    const validatedData = eventObjectSchema
+      .extend({
+        startDate: z.coerce.date(),
+        endDate: z.coerce.date(),
+      })
+      .partial()
+      .parse(body);
 
     return await prisma.$transaction(
       async (tx) => {
@@ -69,6 +75,11 @@ export async function PATCH(
         const newStartDate = validatedData.startDate || currentEvent.startDate;
         const newEndDate = validatedData.endDate || currentEvent.endDate;
         const newStatus = validatedData.status || currentEvent.status;
+
+        // Manual validation for dates since we bypassed .refine()
+        if (newEndDate <= newStartDate) {
+          throw new Error('Дата окончания должна быть позже даты начала');
+        }
 
         // If status is changed to FINISHED, we don't need to check availability for future
         // But if it's CONFIRMED, we must check.

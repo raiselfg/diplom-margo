@@ -2,6 +2,8 @@
 
 import * as React from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { LayoutDashboard, Package, CalendarDays, Tags } from 'lucide-react';
 
 import {
   Sidebar,
@@ -15,56 +17,66 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from '@/ui/components/ui/sidebar';
-import { usePathname } from 'next/navigation';
 
-const data = {
-  navMain: [
-    {
-      title: 'Getting Started',
-      url: '#',
-      items: [
-        {
-          title: 'Инвентарь',
-          url: '/inventor',
-        },
-        {
-          title: 'Project Structure',
-          url: '#',
-        },
-      ],
-    },
-  ],
-};
+const navItems = [
+  {
+    title: 'Дашборд',
+    url: '/',
+    icon: LayoutDashboard,
+  },
+  {
+    title: 'Инвентарь',
+    url: '/inventory',
+    icon: Package,
+  },
+  {
+    title: 'Категории',
+    url: '/categories',
+    icon: Tags,
+  },
+  {
+    title: 'Мероприятия',
+    url: '/events',
+    icon: CalendarDays,
+  },
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
 
   return (
     <Sidebar {...props}>
-      <SidebarHeader></SidebarHeader>
+      <SidebarHeader className="flex h-16 items-center border-b px-6">
+        <span className="text-lg font-bold tracking-tight">Admin Panel</span>
+      </SidebarHeader>
       <SidebarContent>
-        {data.navMain.map((item) => (
-          <SidebarGroup key={item.title}>
-            <SidebarGroupLabel>{item.title}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {item.items.map((subItem) => {
-                  const isActive = pathname?.startsWith(subItem.url) || false;
-                  return (
-                    <SidebarMenuItem key={subItem.title}>
+        <SidebarGroup>
+          <SidebarGroupLabel>Управление</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="flex flex-col gap-1">
+              {navItems.map((item) => {
+                const isActive =
+                  item.url === '/'
+                    ? pathname === '/'
+                    : pathname?.startsWith(item.url);
+
+                return (
+                  <SidebarMenuItem key={item.title}>
+                    <Link href={item.url} className="flex items-center gap-2">
                       <SidebarMenuButton
                         isActive={isActive}
-                        render={<Link href={subItem.url} />}
+                        className="cursor-pointer"
                       >
-                        {subItem.title}
+                        <item.icon className="size-4" />
+                        <span>{item.title}</span>
                       </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+                    </Link>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
       <SidebarRail />
     </Sidebar>

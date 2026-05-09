@@ -43,6 +43,7 @@ export async function PATCH(
     const item = await prisma.item.update({
       where: { id },
       data: validatedData,
+      include: { category: true },
     });
 
     return NextResponse.json(item);

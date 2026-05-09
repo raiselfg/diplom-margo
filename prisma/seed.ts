@@ -1,5 +1,6 @@
+/* eslint-disable no-console */
 import prisma from './prisma-client';
-import { items, events } from './seed-data';
+import { items, events, categories } from './seed-data';
 
 async function main() {
   console.log('Start seeding based on PRD scenarios...');
@@ -7,17 +8,36 @@ async function main() {
   // Clear existing data
   await prisma.reservation.deleteMany();
   await prisma.item.deleteMany();
+  await prisma.category.deleteMany();
   await prisma.event.deleteMany();
 
   console.log('Cleared existing data.');
 
-  // Create Items
-  const createdItems = await Promise.all(
-    items.map((item) =>
-      prisma.item.create({
-        data: item,
+  // Create Categories
+  const createdCategories = await Promise.all(
+    categories.map((cat) =>
+      prisma.category.create({
+        data: cat,
       }),
     ),
+  );
+  console.log(`Created ${createdCategories.length} categories.`);
+
+  // Create Items
+  const createdItems = await Promise.all(
+    items.map((item) => {
+      const category = createdCategories.find(
+        (c) => c.name === item.categoryName,
+      );
+      return prisma.item.create({
+        data: {
+          name: item.name,
+          totalQuantity: item.totalQuantity,
+          description: item.description,
+          categoryId: category?.id,
+        },
+      });
+    }),
   );
   console.log(`Created ${createdItems.length} items.`);
 

@@ -5,14 +5,19 @@ import prisma from '@/prisma/prisma-client';
 import { itemSchema } from '@/lib/validations';
 import { auth } from '@/lib/auth';
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
     const session = await auth.api.getSession({ headers: await headers() });
     if (!session) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    const { searchParams } = new URL(request.url);
+    const categoryId = searchParams.get('categoryId');
+
     const items = await prisma.item.findMany({
+      where: categoryId ? { categoryId } : undefined,
+      include: { category: true },
       orderBy: { createdAt: 'desc' },
     });
     return NextResponse.json(items);
@@ -27,16 +32,22 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    const session = await auth.api.getSession({ headers: await headers() });
+    if (!session) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
     const body = await request.json();
     const validatedData = itemSchema.parse(body);
 
     const item = await prisma.item.create({
       data: {
         name: validatedData.name,
-        category: validatedData.category,
+        categoryId: validatedData.categoryId,
         totalQuantity: validatedData.totalQuantity,
         description: validatedData.description,
       },
+      include: { category: true },
     });
 
     return NextResponse.json(item, { status: 201 });

@@ -1,33 +1,40 @@
 import { EventStatus } from './generated/prisma/client';
 
+export const categories = [
+  { name: 'Мебель' },
+  { name: 'Техника' },
+  { name: 'Декор' },
+  { name: 'Аксессуары' },
+];
+
 export const items = [
   {
     name: 'Стул белый (White Chair)',
-    category: 'Мебель',
+    categoryName: 'Мебель',
     totalQuantity: 50,
     description: 'Классический белый стул для свадеб и банкетов',
   },
   {
     name: 'Sony A7 IV',
-    category: 'Техника',
+    categoryName: 'Техника',
     totalQuantity: 3,
     description: 'Полнокадровая беззеркальная камера',
   },
   {
     name: 'Проектор Epson EB-L520U',
-    category: 'Техника',
+    categoryName: 'Техника',
     totalQuantity: 2,
     description: 'Лазерный проектор для презентаций',
   },
   {
     name: 'Скатерть атласная (Satin Tablecloth)',
-    category: 'Декор',
+    categoryName: 'Декор',
     totalQuantity: 20,
     description: 'Белая атласная скатерть 1.5x1.5м',
   },
   {
     name: 'Manfrotto Tripod',
-    category: 'Аксессуары',
+    categoryName: 'Аксессуары',
     totalQuantity: 5,
     description: 'Профессиональный штатив',
   },
