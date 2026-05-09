@@ -34,10 +34,11 @@ export function EditEventView({ id, event, inventory }: EditEventViewProps) {
       startDate: new Date(event.startDate),
       endDate: new Date(event.endDate),
       status: event.status as EventInput['status'],
-      reservations: event.reservations.map((r) => ({
-        itemId: r.itemId,
-        quantity: r.quantity,
-      })),
+      reservations:
+        event.reservations?.map((r) => ({
+          itemId: r.itemId,
+          quantity: r.quantity,
+        })) || [],
     },
   });
 

@@ -49,7 +49,7 @@ export type Reservation = z.infer<typeof baseReservationSchema> & {
   item?: Item | null;
 };
 export type Event = z.infer<typeof baseEventSchema> & {
-  reservations: Reservation[];
+  reservations?: Reservation[];
   _count?: {
     reservations: number;
   };
