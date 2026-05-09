@@ -98,12 +98,8 @@ export function ItemCreateDialog({
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={field.name}>Категория</FieldLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? null}
-                  items={categories?.map((c) => ({
-                    label: c.name,
-                    value: c.id,
-                  }))}
+                  onValueChange={(val) => val && field.onChange(val)}
+                  value={field.value}
                 >
                   <SelectTrigger
                     id={field.name}

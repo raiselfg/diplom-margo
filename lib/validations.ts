@@ -5,18 +5,21 @@ import z from 'zod';
 export const baseCategorySchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, 'Название обязательно'),
+  createdAt: z.union([z.date(), z.string()]),
+  updatedAt: z.union([z.date(), z.string()]),
 });
 
 export const baseItemSchema = z.object({
   id: z.string().uuid(),
   name: z.string().min(1, 'Название обязательно'),
-  categoryId: z.string().uuid(),
+  categoryId: z.string().uuid().nullable(),
   totalQuantity: z
     .number()
     .int()
     .min(0, 'Количество не может быть отрицательным'),
   description: z.string().nullish(),
   createdAt: z.union([z.date(), z.string()]),
+  updatedAt: z.union([z.date(), z.string()]),
 });
 
 export const baseReservationSchema = z.object({
@@ -32,16 +35,18 @@ export const baseEventSchema = z.object({
   startDate: z.union([z.date(), z.string()]),
   endDate: z.union([z.date(), z.string()]),
   status: z.enum(['CONFIRMED', 'FINISHED']),
+  createdAt: z.union([z.date(), z.string()]),
+  updatedAt: z.union([z.date(), z.string()]),
 });
 
 // --- Inferred Model Types ---
 
 export type Category = z.infer<typeof baseCategorySchema>;
 export type Item = z.infer<typeof baseItemSchema> & {
-  category: Category;
+  category: Category | null;
 };
 export type Reservation = z.infer<typeof baseReservationSchema> & {
-  item?: Item;
+  item?: Item | null;
 };
 export type Event = z.infer<typeof baseEventSchema> & {
   reservations: Reservation[];
@@ -52,20 +57,30 @@ export type Event = z.infer<typeof baseEventSchema> & {
 
 // --- Form / Input Schemas ---
 
-export const categorySchema = baseCategorySchema.omit({ id: true });
+export const categorySchema = baseCategorySchema.omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
 
-export const itemSchema = baseItemSchema.omit({ id: true, createdAt: true });
+export const itemSchema = baseItemSchema
+  .omit({ id: true, createdAt: true, updatedAt: true })
+  .extend({
+    categoryId: z.string().uuid('Выберите категорию'),
+  });
 
 export const reservationInputSchema = baseReservationSchema.omit({
   id: true,
   eventId: true,
 });
 
-export const eventObjectSchema = baseEventSchema.omit({ id: true }).extend({
-  startDate: z.date(),
-  endDate: z.date(),
-  reservations: z.array(reservationInputSchema),
-});
+export const eventObjectSchema = baseEventSchema
+  .omit({ id: true, createdAt: true, updatedAt: true })
+  .extend({
+    startDate: z.date(),
+    endDate: z.date(),
+    reservations: z.array(reservationInputSchema),
+  });
 
 export const eventSchema = eventObjectSchema.refine(
   (data) => data.endDate > data.startDate,

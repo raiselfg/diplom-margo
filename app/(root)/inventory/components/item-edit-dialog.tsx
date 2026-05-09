@@ -24,12 +24,12 @@ import {
 } from '@/ui/components/ui/select';
 import { itemSchema, type ItemInput } from '@/lib/validations';
 import { updateItem } from '@/lib/actions/inventory';
-import { Category, InventoryItem } from '../types';
+import { Category, Item } from '@/lib/validations';
 
 interface ItemEditDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  item: InventoryItem;
+  item: Item;
   categories?: Category[];
 }
 
@@ -45,7 +45,7 @@ export function ItemEditDialog({
     resolver: zodResolver(itemSchema),
     defaultValues: {
       name: item.name,
-      categoryId: item.categoryId,
+      categoryId: item.categoryId ?? undefined,
       totalQuantity: item.totalQuantity,
       description: item.description || '',
     },
@@ -54,7 +54,7 @@ export function ItemEditDialog({
   useEffect(() => {
     form.reset({
       name: item.name,
-      categoryId: item.categoryId,
+      categoryId: item.categoryId ?? undefined,
       totalQuantity: item.totalQuantity,
       description: item.description || '',
     });
@@ -109,12 +109,8 @@ export function ItemEditDialog({
               <Field data-invalid={fieldState.invalid}>
                 <FieldLabel htmlFor={field.name}>Категория</FieldLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  value={field.value ?? null}
-                  items={categories?.map((c) => ({
-                    label: c.name,
-                    value: c.id,
-                  }))}
+                  onValueChange={(val) => val && field.onChange(val)}
+                  value={field.value}
                 >
                   <SelectTrigger
                     id={field.name}

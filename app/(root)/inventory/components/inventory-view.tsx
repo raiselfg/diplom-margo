@@ -145,7 +145,13 @@ export function InventoryView({
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{item.category.name}</Badge>
+                      {item.category ? (
+                        <Badge variant="outline">{item.category.name}</Badge>
+                      ) : (
+                        <span className="text-muted-foreground text-xs italic">
+                          Без категории
+                        </span>
+                      )}
                     </TableCell>
                     <TableCell>{item.totalQuantity}</TableCell>
                     <TableCell>

@@ -90,7 +90,10 @@ export function ReservationRow({
           name={`reservations.${index}.itemId`}
           render={({ field: cField, fieldState }) => (
             <Field data-invalid={fieldState.invalid} className="w-full">
-              <Select onValueChange={cField.onChange} value={cField.value}>
+              <Select
+                onValueChange={(val) => val && cField.onChange(val)}
+                value={cField.value}
+              >
                 <SelectTrigger
                   className="w-full"
                   aria-invalid={fieldState.invalid}
