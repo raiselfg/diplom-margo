@@ -1,8 +1,8 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import { Trash2 } from 'lucide-react';
 import { Control, Controller, useWatch } from 'react-hook-form';
-import { useQuery } from '@tanstack/react-query';
 import { Button } from '@/ui/components/ui/button';
 import { Input } from '@/ui/components/ui/input';
 import {
@@ -18,6 +18,7 @@ import { Field, FieldError } from '@/ui/components/ui/field';
 import { Spinner } from '@/ui/components/ui/spinner';
 import { cn } from '@/ui/lib/utils';
 import { EventInput } from '@/lib/validations';
+import { checkItemAvailability } from '@/lib/actions/availability';
 import { InventoryItem } from '../types';
 
 interface ReservationRowProps {
@@ -30,24 +31,6 @@ interface ReservationRowProps {
   eventId: string;
 }
 
-async function checkAvailability(
-  itemId: string,
-  startDate: Date,
-  endDate: Date,
-  eventId?: string,
-) {
-  const params = new URLSearchParams({
-    itemId: itemId,
-    startDate: startDate.toISOString(),
-    endDate: endDate.toISOString(),
-  });
-  if (eventId && eventId !== 'new') params.append('eventId', eventId);
-
-  const res = await fetch(`/api/availability?${params.toString()}`);
-  if (!res.ok) throw new Error('Failed to check availability');
-  return (await res.json()) as { available: number };
-}
-
 export function ReservationRow({
   control,
   index,
@@ -57,6 +40,9 @@ export function ReservationRow({
   endDate,
   eventId,
 }: ReservationRowProps) {
+  const [avail, setAvail] = useState<number | undefined>(undefined);
+  const [isChecking, setIsChecking] = useState(false);
+
   const itemId = useWatch({
     control,
     name: `reservations.${index}.itemId`,
@@ -67,20 +53,33 @@ export function ReservationRow({
     name: `reservations.${index}.quantity`,
   });
 
-  const { data: availData, isLoading: isChecking } = useQuery({
-    queryKey: [
-      'availability',
-      itemId,
-      startDate?.toISOString(),
-      endDate?.toISOString(),
-      eventId,
-    ],
-    queryFn: () => checkAvailability(itemId, startDate!, endDate!, eventId),
-    enabled: !!itemId && !!startDate && !!endDate,
-    staleTime: 30000, // Cache for 30 seconds
-  });
+  useEffect(() => {
+    async function check() {
+      if (!itemId || !startDate || !endDate) {
+        setAvail(undefined);
+        return;
+      }
 
-  const avail = availData?.available;
+      setIsChecking(true);
+      try {
+        const data = await checkItemAvailability({
+          itemId,
+          startDate,
+          endDate,
+          eventId,
+        });
+        setAvail(data.available);
+      } catch (error) {
+        console.error('Availability check failed:', error);
+      } finally {
+        setIsChecking(false);
+      }
+    }
+
+    const timer = setTimeout(check, 300); // Debounce
+    return () => clearTimeout(timer);
+  }, [itemId, startDate, endDate, eventId]);
+
   const isOverLimit = avail !== undefined && quantity > avail;
 
   return (
@@ -90,19 +89,18 @@ export function ReservationRow({
           control={control}
           name={`reservations.${index}.itemId`}
           render={({ field: cField, fieldState }) => (
-            <Field data-invalid={fieldState.invalid}>
-              <Select
-                onValueChange={cField.onChange}
-                value={cField.value}
-                items={inventory?.map((i) => ({ label: i.name, value: i.id }))}
-              >
-                <SelectTrigger aria-invalid={fieldState.invalid}>
-                  <SelectValue placeholder="Выберите предмет" />
+            <Field data-invalid={fieldState.invalid} className="w-full">
+              <Select onValueChange={cField.onChange} value={cField.value}>
+                <SelectTrigger
+                  className="w-full"
+                  aria-invalid={fieldState.invalid}
+                >
+                  <SelectValue placeholder="Предмет" />
                 </SelectTrigger>
                 <SelectContent>
-                  {inventory?.map((item) => (
-                    <SelectItem key={item.id} value={item.id}>
-                      {item.name}
+                  {inventory?.map((i) => (
+                    <SelectItem key={i.id} value={i.id}>
+                      {i.name}
                     </SelectItem>
                   ))}
                 </SelectContent>

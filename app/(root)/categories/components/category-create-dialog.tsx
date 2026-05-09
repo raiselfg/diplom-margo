@@ -1,8 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import {
@@ -17,6 +17,7 @@ import { Button } from '@/ui/components/ui/button';
 import { Input } from '@/ui/components/ui/input';
 import { Field, FieldLabel, FieldError } from '@/ui/components/ui/field';
 import { categorySchema, type CategoryInput } from '@/lib/validations';
+import { createCategory } from '@/lib/actions/categories';
 
 interface CategoryCreateDialogProps {
   isOpen: boolean;
@@ -27,7 +28,7 @@ export function CategoryCreateDialog({
   isOpen,
   onOpenChange,
 }: CategoryCreateDialogProps) {
-  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
 
   const form = useForm<CategoryInput>({
     resolver: zodResolver(categorySchema),
@@ -36,33 +37,20 @@ export function CategoryCreateDialog({
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: async (values: CategoryInput) => {
-      const res = await fetch('/api/categories', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to create category');
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+  const onSubmit = async (values: CategoryInput) => {
+    setIsPending(true);
+    try {
+      await createCategory(values);
       onOpenChange(false);
       form.reset();
       toast.success('Категория создана');
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const onSubmit = (values: CategoryInput) => {
-    mutation.mutate(values);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Ошибка при создании',
+      );
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -94,7 +82,7 @@ export function CategoryCreateDialog({
             )}
           />
           <DialogFooter>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" disabled={isPending}>
               Создать категорию
             </Button>
           </DialogFooter>

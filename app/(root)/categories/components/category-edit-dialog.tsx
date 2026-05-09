@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 
 import {
@@ -18,6 +17,7 @@ import { Button } from '@/ui/components/ui/button';
 import { Input } from '@/ui/components/ui/input';
 import { Field, FieldLabel, FieldError } from '@/ui/components/ui/field';
 import { categorySchema, type CategoryInput } from '@/lib/validations';
+import { updateCategory } from '@/lib/actions/categories';
 
 interface Category {
   id: string;
@@ -35,7 +35,7 @@ export function CategoryEditDialog({
   onOpenChange,
   category,
 }: CategoryEditDialogProps) {
-  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
 
   const form = useForm<CategoryInput>({
     resolver: zodResolver(categorySchema),
@@ -48,32 +48,19 @@ export function CategoryEditDialog({
     form.reset({ name: category.name });
   }, [category, form, isOpen]);
 
-  const mutation = useMutation({
-    mutationFn: async (values: CategoryInput) => {
-      const res = await fetch(`/api/categories/${category.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to update category');
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['categories'] });
+  const onSubmit = async (values: CategoryInput) => {
+    setIsPending(true);
+    try {
+      await updateCategory(category.id, values);
       onOpenChange(false);
       toast.success('Категория обновлена');
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const onSubmit = (values: CategoryInput) => {
-    mutation.mutate(values);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Ошибка при обновлении',
+      );
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -105,7 +92,7 @@ export function CategoryEditDialog({
             )}
           />
           <DialogFooter>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" disabled={isPending}>
               Сохранить изменения
             </Button>
           </DialogFooter>

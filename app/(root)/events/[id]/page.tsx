@@ -1,156 +1,60 @@
-'use client';
+import { getEventById } from '@/lib/actions/events';
+import { getInventory } from '@/lib/actions/inventory';
+import { EditEventView } from './components/edit-event-view';
+import { notFound } from 'next/navigation';
+import { Suspense } from 'react';
+import { Skeleton } from '@/ui/components/ui/skeleton';
 
-import { useEffect, useMemo } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ChevronLeft } from 'lucide-react';
-import { useForm, useWatch } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
+export default async function EditEventPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
 
-import { Button } from '@/ui/components/ui/button';
-import { Spinner } from '@/ui/components/ui/spinner';
-import { eventSchema, type EventInput } from '@/lib/validations';
-
-import { EventBasicInfoCard } from '../shared/components/event-basic-info-card';
-import { EventStatusCard } from '../shared/components/event-status-card';
-import { EventInventoryCard } from '../shared/components/event-inventory-card';
-import { type EventData, type InventoryItem } from '../shared/types';
-
-async function fetchEvent(id: string) {
-  const res = await fetch(`/api/events/${id}`);
-  if (!res.ok) throw new Error('Failed to fetch event');
-  return (await res.json()) as EventData;
+  return (
+    <Suspense fallback={<EventEditorSkeleton />}>
+      <EditEventPageContent id={id} />
+    </Suspense>
+  );
 }
 
-async function fetchInventory() {
-  const res = await fetch('/api/inventory');
-  if (!res.ok) throw new Error('Failed to fetch inventory');
-  return (await res.json()) as InventoryItem[];
-}
-
-export default function EditEventPage() {
-  const router = useRouter();
-  const params = useParams();
-  const id = params.id as string;
-
-  const queryClient = useQueryClient();
-  const { data: event, isLoading: isLoadingEvent } = useQuery({
-    queryKey: ['event', id],
-    queryFn: () => fetchEvent(id),
-  });
-
-  const { data: inventory } = useQuery({
-    queryKey: ['inventory'],
-    queryFn: fetchInventory,
-  });
-
-  const defaultDates = useMemo(() => {
-    const start = new Date();
-    const end = new Date(start.getTime() + 86400000);
-    return { start, end };
-  }, []);
-
-  const form = useForm<EventInput>({
-    resolver: zodResolver(eventSchema),
-    defaultValues: {
-      title: '',
-      startDate: defaultDates.start,
-      endDate: defaultDates.end,
-      status: 'CONFIRMED',
-      reservations: [],
-    },
-  });
-
-  useEffect(() => {
-    if (event) {
-      form.reset({
-        title: event.title,
-        startDate: new Date(event.startDate),
-        endDate: new Date(event.endDate),
-        status: event.status,
-        reservations: event.reservations.map((r) => ({
-          itemId: r.itemId,
-          quantity: r.quantity,
-        })),
-      });
-    }
-  }, [event, form]);
-
-  const watchStartDate = useWatch({ control: form.control, name: 'startDate' });
-  const watchEndDate = useWatch({ control: form.control, name: 'endDate' });
-
-  const mutation = useMutation({
-    mutationFn: async (values: EventInput) => {
-      const res = await fetch(`/api/events/${id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(
-          (errorData as { error: string }).error || 'Failed to save event',
-        );
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['events'] });
-      toast.success('Изменения сохранены');
-      router.push('/events');
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  if (isLoadingEvent) {
-    return (
-      <div className="flex h-32 items-center justify-center">
-        <Spinner />
-      </div>
-    );
+async function EditEventPageContent({ id }: { id: string }) {
+  let data;
+  try {
+    const [event, inventory] = await Promise.all([
+      getEventById(id),
+      getInventory(),
+    ]);
+    data = { event, inventory };
+  } catch {
+    notFound();
   }
 
   return (
+    <EditEventView id={id} event={data.event} inventory={data.inventory} />
+  );
+}
+
+function EventEditorSkeleton() {
+  return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" onClick={() => router.back()}>
-          <ChevronLeft />
-        </Button>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Редактирование мероприятия
-        </h1>
+        <Skeleton className="h-10 w-10 rounded-md" />
+        <Skeleton className="h-9 w-64" />
       </div>
 
-      <form
-        onSubmit={form.handleSubmit((v) => mutation.mutate(v))}
-        className="flex flex-col gap-8"
-      >
-        <div className="grid gap-6 md:grid-cols-3">
-          <EventBasicInfoCard control={form.control} />
-          <EventStatusCard control={form.control} />
-        </div>
+      <div className="grid gap-6 md:grid-cols-3">
+        <Skeleton className="h-64 rounded-xl md:col-span-2" />
+        <Skeleton className="h-64 rounded-xl" />
+      </div>
 
-        <EventInventoryCard
-          control={form.control}
-          inventory={inventory}
-          startDate={watchStartDate}
-          endDate={watchEndDate}
-          eventId={id}
-        />
+      <Skeleton className="h-96 rounded-xl" />
 
-        <div className="flex justify-end gap-4">
-          <Button variant="outline" type="button" onClick={() => router.back()}>
-            Отмена
-          </Button>
-          <Button type="submit" disabled={mutation.isPending}>
-            {mutation.isPending && <Spinner data-icon="inline-start" />}
-            {mutation.isPending ? 'Сохранение...' : 'Сохранить изменения'}
-          </Button>
-        </div>
-      </form>
+      <div className="flex justify-end gap-4">
+        <Skeleton className="h-10 w-24" />
+        <Skeleton className="h-10 w-40" />
+      </div>
     </div>
   );
 }

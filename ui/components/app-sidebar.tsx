@@ -20,7 +20,7 @@ import { ThemeToggle } from './theme-toggle';
 
 const navItems = [
   {
-    title: 'Дашборд',
+    title: 'Главная',
     url: '/',
     icon: LayoutDashboard,
   },

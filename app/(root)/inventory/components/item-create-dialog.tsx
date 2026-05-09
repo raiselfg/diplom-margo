@@ -1,8 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -23,6 +23,7 @@ import {
   SelectValue,
 } from '@/ui/components/ui/select';
 import { itemSchema, type ItemInput } from '@/lib/validations';
+import { createItem } from '@/lib/actions/inventory';
 import { Category } from '../types';
 
 interface ItemCreateDialogProps {
@@ -36,41 +37,31 @@ export function ItemCreateDialog({
   onOpenChange,
   categories,
 }: ItemCreateDialogProps) {
-  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
 
   const form = useForm<ItemInput>({
     resolver: zodResolver(itemSchema),
     defaultValues: {
       name: '',
-      // categoryId: undefined,
       totalQuantity: 0,
       description: '',
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: async (values: ItemInput) => {
-      const res = await fetch('/api/inventory', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-      if (!res.ok) throw new Error('Failed to create item');
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+  const onSubmit = async (values: ItemInput) => {
+    setIsPending(true);
+    try {
+      await createItem(values);
       onOpenChange(false);
       form.reset();
       toast.success('Предмет добавлен');
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const onSubmit = (values: ItemInput) => {
-    mutation.mutate(values);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Ошибка при создании',
+      );
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -178,7 +169,7 @@ export function ItemCreateDialog({
           />
 
           <DialogFooter>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" disabled={isPending}>
               Создать предмет
             </Button>
           </DialogFooter>

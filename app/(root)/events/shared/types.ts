@@ -1,17 +1,6 @@
-export interface InventoryItem {
-  id: string;
-  name: string;
-  category: string | null;
-}
+import { Event, Item } from '@/lib/validations';
 
-export interface EventData {
-  id: string;
-  title: string;
-  startDate: string;
-  endDate: string;
-  status: 'CONFIRMED' | 'FINISHED';
-  reservations: Array<{
-    itemId: string;
-    quantity: number;
-  }>;
-}
+export type EventData = Event;
+export type InventoryItem = Item;
+
+export * from '@/lib/validations';

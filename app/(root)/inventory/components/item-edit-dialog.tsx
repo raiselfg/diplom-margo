@@ -1,9 +1,8 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import {
   Dialog,
@@ -24,6 +23,7 @@ import {
   SelectValue,
 } from '@/ui/components/ui/select';
 import { itemSchema, type ItemInput } from '@/lib/validations';
+import { updateItem } from '@/lib/actions/inventory';
 import { Category, InventoryItem } from '../types';
 
 interface ItemEditDialogProps {
@@ -39,7 +39,7 @@ export function ItemEditDialog({
   item,
   categories,
 }: ItemEditDialogProps) {
-  const queryClient = useQueryClient();
+  const [isPending, setIsPending] = useState(false);
 
   const form = useForm<ItemInput>({
     resolver: zodResolver(itemSchema),
@@ -60,31 +60,19 @@ export function ItemEditDialog({
     });
   }, [item, form, isOpen]);
 
-  const mutation = useMutation({
-    mutationFn: async (values: ItemInput) => {
-      const res = await fetch(`/api/inventory/${item.id}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(values),
-      });
-      if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.error || 'Failed to update item');
-      }
-      return res.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+  const onSubmit = async (values: ItemInput) => {
+    setIsPending(true);
+    try {
+      await updateItem(item.id, values);
       onOpenChange(false);
       toast.success('Предмет обновлен');
-    },
-    onError: (error) => {
-      toast.error(error.message);
-    },
-  });
-
-  const onSubmit = (values: ItemInput) => {
-    mutation.mutate(values);
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : 'Ошибка при обновлении',
+      );
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -192,7 +180,7 @@ export function ItemEditDialog({
           />
 
           <DialogFooter>
-            <Button type="submit" disabled={mutation.isPending}>
+            <Button type="submit" disabled={isPending}>
               Сохранить изменения
             </Button>
           </DialogFooter>

@@ -1,6 +1,5 @@
-'use client';
-
-import { useQuery } from '@tanstack/react-query';
+import { getInventory } from '@/lib/actions/inventory';
+import { getEvents } from '@/lib/actions/events';
 import { Package, CalendarDays, CheckCircle2 } from 'lucide-react';
 import {
   Card,
@@ -8,7 +7,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/ui/components/ui/card';
-import { Skeleton } from '@/ui/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -25,72 +23,16 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from '@/ui/components/ui/empty';
+import { Skeleton } from '@/ui/components/ui/skeleton';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-interface DashboardItem {
-  id: string;
-}
-
-interface DashboardEvent {
-  id: string;
-  title: string;
-  startDate: string;
-  endDate: string;
-  status: 'CONFIRMED' | 'FINISHED';
-}
-
-function FormattedDate({ date }: { date: string }) {
-  return (
-    <span suppressHydrationWarning>{new Date(date).toLocaleDateString()}</span>
-  );
-}
-
-async function fetchStats() {
-  const [itemsRes, eventsRes] = await Promise.all([
-    fetch('/api/inventory'),
-    fetch('/api/events'),
-  ]);
-
-  if (!itemsRes.ok || !eventsRes.ok) throw new Error('Failed to fetch stats');
-
-  return {
-    items: (await itemsRes.json()) as DashboardItem[],
-    events: (await eventsRes.json()) as DashboardEvent[],
-  };
+function FormattedDate({ date }: { date: Date | string }) {
+  const d = typeof date === 'string' ? new Date(date) : date;
+  return <span suppressHydrationWarning>{d.toLocaleDateString()}</span>;
 }
 
 export default function AdminPage() {
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['dashboard-stats'],
-    queryFn: fetchStats,
-  });
-
-  if (error)
-    return (
-      <div className="text-destructive text-sm">Ошибка загрузки данных</div>
-    );
-
-  const stats = [
-    {
-      title: 'Всего предметов',
-      value: data?.items?.length || 0,
-      icon: Package,
-      description: 'Позиций в каталоге',
-    },
-    {
-      title: 'Активные брони',
-      value: data?.events?.filter((e) => e.status === 'CONFIRMED').length || 0,
-      icon: CalendarDays,
-      description: 'Подтвержденных мероприятий',
-    },
-    {
-      title: 'Завершено',
-      value: data?.events?.filter((e) => e.status === 'FINISHED').length || 0,
-      icon: CheckCircle2,
-      description: 'Прошедших событий',
-    },
-  ];
-
   return (
     <div className="flex flex-col gap-8">
       <div>
@@ -100,6 +42,39 @@ export default function AdminPage() {
         </p>
       </div>
 
+      <Suspense fallback={<DashboardSkeleton />}>
+        <AdminPageContent />
+      </Suspense>
+    </div>
+  );
+}
+
+async function AdminPageContent() {
+  const [items, events] = await Promise.all([getInventory(), getEvents()]);
+
+  const stats = [
+    {
+      title: 'Всего предметов',
+      value: items.length,
+      icon: Package,
+      description: 'Позиций в каталоге',
+    },
+    {
+      title: 'Активные брони',
+      value: events.filter((e) => e.status === 'CONFIRMED').length,
+      icon: CalendarDays,
+      description: 'Подтвержденных мероприятий',
+    },
+    {
+      title: 'Завершено',
+      value: events.filter((e) => e.status === 'FINISHED').length,
+      icon: CheckCircle2,
+      description: 'Прошедших событий',
+    },
+  ];
+
+  return (
+    <>
       <div className="grid gap-4 md:grid-cols-3">
         {stats.map((stat) => (
           <Card key={stat.title}>
@@ -110,11 +85,7 @@ export default function AdminPage() {
               <stat.icon className="text-muted-foreground" data-icon />
             </CardHeader>
             <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-8 w-20" />
-              ) : (
-                <div className="text-2xl font-bold">{stat.value}</div>
-              )}
+              <div className="text-2xl font-bold">{stat.value}</div>
               <p className="text-muted-foreground mt-1 text-xs">
                 {stat.description}
               </p>
@@ -128,13 +99,7 @@ export default function AdminPage() {
           <CardTitle>Ближайшие мероприятия</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-              <Skeleton className="h-10 w-full" />
-            </div>
-          ) : !data?.events || data.events.length === 0 ? (
+          {events.length === 0 ? (
             <Empty className="border-0">
               <EmptyHeader>
                 <CalendarDays className="text-muted-foreground size-8" />
@@ -155,7 +120,7 @@ export default function AdminPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {data?.events?.slice(0, 5).map((event) => (
+                {events.slice(0, 5).map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.title}</TableCell>
                     <TableCell>
@@ -188,6 +153,38 @@ export default function AdminPage() {
               </TableBody>
             </Table>
           )}
+        </CardContent>
+      </Card>
+    </>
+  );
+}
+
+function DashboardSkeleton() {
+  return (
+    <div className="flex flex-col gap-8">
+      <div className="grid gap-4 md:grid-cols-3">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <Card key={i}>
+            <CardHeader className="pb-2">
+              <Skeleton className="h-4 w-24" />
+            </CardHeader>
+            <CardContent>
+              <Skeleton className="h-8 w-16" />
+              <Skeleton className="mt-1 h-3 w-32" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+      <Card>
+        <CardHeader>
+          <Skeleton className="h-6 w-48" />
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-2">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton key={i} className="h-10 w-full" />
+            ))}
+          </div>
         </CardContent>
       </Card>
     </div>

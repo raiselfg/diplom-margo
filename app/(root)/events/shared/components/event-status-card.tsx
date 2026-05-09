@@ -33,14 +33,7 @@ export function EventStatusCard({ control }: EventStatusCardProps) {
           name="status"
           render={({ field, fieldState }) => (
             <Field data-invalid={fieldState.invalid}>
-              <Select
-                onValueChange={field.onChange}
-                value={field.value}
-                items={[
-                  { label: 'Забронировано', value: 'CONFIRMED' },
-                  { label: 'Завершено', value: 'FINISHED' },
-                ]}
-              >
+              <Select onValueChange={field.onChange} value={field.value}>
                 <SelectTrigger aria-invalid={fieldState.invalid}>
                   <SelectValue placeholder="Выберите статус" />
                 </SelectTrigger>
