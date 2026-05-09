@@ -56,33 +56,54 @@ export function EventBasicInfoCard({ control }: EventBasicInfoCardProps) {
             name="startDate"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Дата начала</FieldLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground',
-                      )}
-                      aria-invalid={fieldState.invalid}
-                    >
-                      {field.value ? (
-                        format(field.value, 'PPP', { locale: ru })
-                      ) : (
-                        <span>Выберите дату</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FieldLabel>Дата и время начала</FieldLabel>
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'flex-1 pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground',
+                        )}
+                        aria-invalid={fieldState.invalid}
+                      >
+                        {field.value ? (
+                          format(field.value, 'PPP', { locale: ru })
+                        ) : (
+                          <span>Выберите дату</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(date) => {
+                          if (!date) return;
+                          const newDate = new Date(date);
+                          if (field.value) {
+                            newDate.setHours(field.value.getHours());
+                            newDate.setMinutes(field.value.getMinutes());
+                          }
+                          field.onChange(newDate);
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Input
+                    type="time"
+                    className="w-30"
+                    value={field.value ? format(field.value, 'HH:mm') : ''}
+                    onChange={(e) => {
+                      const [hours, minutes] = e.target.value.split(':');
+                      const newDate = new Date(field.value || new Date());
+                      newDate.setHours(parseInt(hours), parseInt(minutes));
+                      field.onChange(newDate);
+                    }}
+                  />
+                </div>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
@@ -95,33 +116,54 @@ export function EventBasicInfoCard({ control }: EventBasicInfoCardProps) {
             name="endDate"
             render={({ field, fieldState }) => (
               <Field data-invalid={fieldState.invalid}>
-                <FieldLabel>Дата окончания</FieldLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground',
-                      )}
-                      aria-invalid={fieldState.invalid}
-                    >
-                      {field.value ? (
-                        format(field.value, 'PPP', { locale: ru })
-                      ) : (
-                        <span>Выберите дату</span>
-                      )}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                    />
-                  </PopoverContent>
-                </Popover>
+                <FieldLabel>Дата и время окончания</FieldLabel>
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'flex-1 pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground',
+                        )}
+                        aria-invalid={fieldState.invalid}
+                      >
+                        {field.value ? (
+                          format(field.value, 'PPP', { locale: ru })
+                        ) : (
+                          <span>Выберите дату</span>
+                        )}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(date) => {
+                          if (!date) return;
+                          const newDate = new Date(date);
+                          if (field.value) {
+                            newDate.setHours(field.value.getHours());
+                            newDate.setMinutes(field.value.getMinutes());
+                          }
+                          field.onChange(newDate);
+                        }}
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <Input
+                    type="time"
+                    className="w-[120px]"
+                    value={field.value ? format(field.value, 'HH:mm') : ''}
+                    onChange={(e) => {
+                      const [hours, minutes] = e.target.value.split(':');
+                      const newDate = new Date(field.value || new Date());
+                      newDate.setHours(parseInt(hours), parseInt(minutes));
+                      field.onChange(newDate);
+                    }}
+                  />
+                </div>
                 {fieldState.invalid && (
                   <FieldError errors={[fieldState.error]} />
                 )}
