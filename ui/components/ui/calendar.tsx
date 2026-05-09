@@ -14,6 +14,8 @@ import {
 
 import { cn } from '@/ui/lib/utils';
 import { Button, buttonVariants } from '@/ui/components/ui/button';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
 function Calendar({
   className,
@@ -41,7 +43,9 @@ function Calendar({
       captionLayout={captionLayout}
       formatters={{
         formatMonthDropdown: (date) =>
-          date.toLocaleString('default', { month: 'short' }),
+          format(new Date(date), 'd MMM', {
+            locale: ru,
+          }),
         ...formatters,
       }}
       classNames={{
