@@ -1,8 +1,7 @@
 import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import { z } from 'zod';
-import { Prisma } from '@prisma/client';
-import prisma from '@/prisma/prisma-client';
+import prisma, { Prisma } from '@/prisma/prisma-client';
 import { categorySchema } from '@/lib/validations';
 import { auth } from '@/lib/auth';
 
