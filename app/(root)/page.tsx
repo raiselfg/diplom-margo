@@ -26,10 +26,17 @@ import {
 import { Skeleton } from '@/ui/components/ui/skeleton';
 import Link from 'next/link';
 import { Suspense } from 'react';
+import { format } from 'date-fns';
+import { ru } from 'date-fns/locale';
 
-function FormattedDate({ date }: { date: Date | string }) {
-  const d = typeof date === 'string' ? new Date(date) : date;
-  return <span suppressHydrationWarning>{d.toLocaleDateString()}</span>;
+export function FormattedDate({ date }: { date: Date | string }) {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+
+  return (
+    <span suppressHydrationWarning>
+      {format(dateObj, 'dd MMMM yyyy, HH:mm', { locale: ru })}
+    </span>
+  );
 }
 
 export default function AdminPage() {

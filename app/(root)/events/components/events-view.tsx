@@ -10,8 +10,7 @@ import {
   CalendarDays,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { format } from 'date-fns';
-import { ru } from 'date-fns/locale';
+
 import Link from 'next/link';
 
 import { Card, CardContent } from '@/ui/components/ui/card';
@@ -46,6 +45,7 @@ import {
 import { deleteEvent } from '@/lib/actions/events';
 
 import { Event } from '@/lib/validations';
+import { FormattedDate } from '../../page';
 
 interface EventsViewProps {
   initialEvents: Event[];
@@ -135,16 +135,11 @@ export function EventsView({ initialEvents }: EventsViewProps) {
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.title}</TableCell>
                     <TableCell
-                      className="text-muted-foreground text-xs whitespace-nowrap"
+                      className="whitespace-nowrap"
                       suppressHydrationWarning
                     >
-                      {format(new Date(event.startDate), 'd MMM', {
-                        locale: ru,
-                      })}{' '}
-                      -{' '}
-                      {format(new Date(event.endDate), 'd MMM yyyy', {
-                        locale: ru,
-                      })}
+                      <FormattedDate date={event.startDate} /> -{' '}
+                      <FormattedDate date={event.endDate} />
                     </TableCell>
                     <TableCell>
                       <Badge
