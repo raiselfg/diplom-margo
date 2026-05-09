@@ -36,7 +36,7 @@ export default function AdminPage() {
   return (
     <div className="flex flex-col gap-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Дашборд</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Главная</h1>
         <p className="text-muted-foreground text-sm">
           Обзор состояния системы и ближайших событий.
         </p>
@@ -51,6 +51,13 @@ export default function AdminPage() {
 
 async function AdminPageContent() {
   const [items, events] = await Promise.all([getInventory(), getEvents()]);
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const upcomingEvents = events.filter(
+    (event) => new Date(event.startDate) >= today,
+  );
 
   const stats = [
     {
@@ -99,7 +106,7 @@ async function AdminPageContent() {
           <CardTitle>Ближайшие мероприятия</CardTitle>
         </CardHeader>
         <CardContent>
-          {events.length === 0 ? (
+          {upcomingEvents.length === 0 ? (
             <Empty className="border-0">
               <EmptyHeader>
                 <CalendarDays className="text-muted-foreground size-8" />
@@ -120,7 +127,7 @@ async function AdminPageContent() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {events.slice(0, 5).map((event) => (
+                {upcomingEvents.slice(0, 5).map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.title}</TableCell>
                     <TableCell>
