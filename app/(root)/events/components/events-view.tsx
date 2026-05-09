@@ -86,16 +86,18 @@ export function EventsView({ initialEvents }: EventsViewProps) {
             Планирование событий и управление бронированием.
           </p>
         </div>
-        <Button render={<Link href="/events/new" />} nativeButton={false}>
-          <Plus data-icon="inline-start" />
-          Новое мероприятие
+        <Button asChild>
+          <Link href="/events/new">
+            <Plus />
+            Новое мероприятие
+          </Link>
         </Button>
       </div>
 
       <div className="flex max-w-sm items-center gap-2">
         <InputGroup>
           <InputGroupAddon>
-            <Search data-icon />
+            <Search />
           </InputGroupAddon>
           <InputGroupInput
             placeholder="Поиск по названию"
@@ -158,23 +160,23 @@ export function EventsView({ initialEvents }: EventsViewProps) {
                     <TableCell>{event._count?.reservations || 0}</TableCell>
                     <TableCell>
                       <DropdownMenu>
-                        <DropdownMenuTrigger
-                          render={<Button variant="ghost" size="icon-sm" />}
-                        >
-                          <MoreHorizontal />
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon-sm">
+                            <MoreHorizontal />
+                          </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            render={<Link href={`/events/${event.id}`} />}
-                          >
-                            <Pencil data-icon="inline-start" />
-                            Изменить
+                          <DropdownMenuItem asChild>
+                            <Link href={`/events/${event.id}`}>
+                              <Pencil />
+                              Изменить
+                            </Link>
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             className="text-destructive"
                             onClick={() => setDeletingId(event.id)}
                           >
-                            <Trash2 data-icon="inline-start" />
+                            <Trash2 />
                             Удалить
                           </DropdownMenuItem>
                         </DropdownMenuContent>

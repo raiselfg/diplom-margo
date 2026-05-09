@@ -139,13 +139,8 @@ async function AdminPageContent() {
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button
-                        variant="link"
-                        size="sm"
-                        render={<Link href={`/events/${event.id}`} />}
-                        nativeButton={false}
-                      >
-                        Редактировать
+                      <Button variant="link" size="sm" asChild>
+                        <Link href={`/events/${event.id}`}>Редактировать</Link>
                       </Button>
                     </TableCell>
                   </TableRow>

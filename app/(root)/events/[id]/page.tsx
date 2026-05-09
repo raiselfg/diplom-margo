@@ -10,16 +10,19 @@ export default async function EditEventPage({
 }: {
   params: Promise<{ id: string }>;
 }) {
-  const { id } = await params;
-
   return (
     <Suspense fallback={<EventEditorSkeleton />}>
-      <EditEventPageContent id={id} />
+      <EditEventPageContent params={params} />
     </Suspense>
   );
 }
 
-async function EditEventPageContent({ id }: { id: string }) {
+async function EditEventPageContent({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   let data;
   try {
     const [event, inventory] = await Promise.all([
